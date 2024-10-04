@@ -27,8 +27,8 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
-  label: z.string().nonempty(),
-  imageUrl: z.string().nonempty(),
+  label: z.string().nonempty("Label is required"),
+  imageUrl: z.string().url("Invalid URL").nonempty("Image URL is required"),
 })
 
 type BillboardFormValues = z.infer<typeof formSchema>
@@ -89,9 +89,9 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       await axios.delete(
         `/api/${params.storeId}/billboards/${params.billboardId}`,
       )
+      toast.success('Billboard deleted.')
       router.refresh()
       router.push(`/${params.storeId}/billboards`)
-      toast.success('Billboard deleted.')
     } catch (error) {
       toast.error('Make sure you removed all categories from this billboard.')
     } finally {
@@ -104,23 +104,18 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     <>
       <AlertModal
         isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-        }}
+        onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
         isLoading={isLoading}
       />
 
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
-
         {initialData && (
           <Button
             variant="destructive"
             size="icon"
-            onClick={() => {
-              setIsOpen(true)
-            }}
+            onClick={() => setIsOpen(true)}
             disabled={isLoading}
           >
             <Trash className="w-4 h-4" />
@@ -149,7 +144,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                     onRemove={() => field.onChange('')}
                   />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -169,7 +163,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                       placeholder="Billboard label"
                     />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -177,7 +170,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
           </div>
 
           <Button disabled={isLoading} className="ml-auto" type="submit">
-            {action}
+            {isLoading ? 'Loading...' : action}
           </Button>
         </form>
       </Form>

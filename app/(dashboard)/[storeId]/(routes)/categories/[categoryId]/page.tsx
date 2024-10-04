@@ -1,3 +1,5 @@
+import { ObjectId } from 'bson'; // Import ObjectId to validate categoryId
+
 import prismadb from '@/lib/prismadb'
 
 import { CategoryForm } from './components/category-form'
@@ -10,17 +12,27 @@ const CategoryPage = async ({
     storeId: string
   }
 }) => {
-  const category = await prismadb.category.findUnique({
-    where: {
-      id: params.categoryId,
-    },
-  })
+  // Check if categoryId is "new" or a valid ObjectId
+  const isNewCategory = params.categoryId === "new";
+  const categoryId = ObjectId.isValid(params.categoryId) ? params.categoryId : null;
 
+  let category = null;
+
+  if (!isNewCategory && categoryId) {
+    // Only fetch the category if it's not "new" and the ID is valid
+    category = await prismadb.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
+  }
+
+  // Fetch billboards regardless of whether it's a new category
   const billboards = await prismadb.billboard.findMany({
     where: {
       storeId: params.storeId,
     },
-  })
+  });
 
   return (
     <div className="flex-col">
@@ -28,7 +40,7 @@ const CategoryPage = async ({
         <CategoryForm billboards={billboards} initialData={category} />
       </div>
     </div>
-  )
+  );
 }
 
-export default CategoryPage
+export default CategoryPage;

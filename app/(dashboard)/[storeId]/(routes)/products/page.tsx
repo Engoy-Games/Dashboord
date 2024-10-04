@@ -30,7 +30,7 @@ const ProductsPage = async ({
     name: product.name,
     isFeatured: product.isFeatured,
     isArchived: product.isArchived,
-    price: formatter.format(product.price.toNumber()),
+    price: formatter.format(product.price),
     category: product.category.name,
     createdAt: format(product.createdAt, 'MMMM do, yyyy'),
   }))

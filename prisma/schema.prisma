@@ -3,14 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Store {
-  id         String      @id @default(uuid())
-  name       String
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  name       String   
   userId     String
   billboards Billboard[] @relation("StoreToBillboard")
   categories Category[]  @relation("StoreToCategory")
@@ -21,8 +20,8 @@ model Store {
 }
 
 model Billboard {
-  id         String     @id @default(uuid())
-  storeId    String
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  storeId    String     @db.ObjectId
   store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
   categories Category[]
   label      String
@@ -34,10 +33,10 @@ model Billboard {
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  storeId     String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  storeId     String    @db.ObjectId
   store       Store     @relation("StoreToCategory", fields: [storeId], references: [id])
-  billboardId String
+  billboardId String    @db.ObjectId
   billboard   Billboard @relation(fields: [billboardId], references: [id])
   name        String
   createdAt   DateTime  @default(now())
@@ -49,16 +48,16 @@ model Category {
 }
 
 model Product {
-  id         String      @id @default(uuid())
-  storeId    String
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  storeId    String      @db.ObjectId
   store      Store       @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId String
+  categoryId String      @db.ObjectId
   category   Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
   name       String
-  price      Decimal
+  price      Float
   isFeatured Boolean     @default(false)
   isArchived Boolean     @default(false)
-  images     Image[] 
+  images     Image[]
   orderItems OrderItem[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
@@ -68,8 +67,8 @@ model Product {
 }
 
 model Image {
-  id        String   @id @default(uuid())
-  productId String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
   createdAt DateTime @default(now())
@@ -79,8 +78,8 @@ model Image {
 }
 
 model Order {
-  id         String      @id @default(uuid())
-  storeId    String
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  storeId    String      @db.ObjectId
   store      Store       @relation("StoreToOrder", fields: [storeId], references: [id])
   orderItems OrderItem[]
   isPaid     Boolean     @default(false)
@@ -93,12 +92,165 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String  @db.ObjectId
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
+  productId String  @db.ObjectId
   product   Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
   @@index([productId])
 }
+
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mongodb"
+//   url      = env("DATABASE_URL")
+// }
+
+// model Store {
+//   id         String      @id @default(auto()) @map("_id") @db.ObjectId
+//   name       String
+//   userId     String
+//   billboards Billboard[] @relation("StoreToBillboard")
+//   categories Category[]  @relation("StoreToCategory")
+//   products   Product[]   @relation("StoreToProduct")
+//   orders     Order[]     @relation("StoreToOrder")
+//   createdAt  DateTime    @default(now())
+//   updatedAt  DateTime    @updatedAt
+// }
+
+// model Billboard {
+//   id         String     @id @default(auto()) @map("_id") @db.ObjectId
+//   storeId    String     @db.ObjectId
+//   store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
+//   categories Category[]
+//   label      String
+//   imageUrl   String
+//   createdAt  DateTime   @default(now())
+//   updatedAt  DateTime   @updatedAt
+
+//   @@index([storeId])
+// }
+
+// model Category {
+//   id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+//   storeId               String    @db.ObjectId
+//   store                 Store     @relation("StoreToCategory", fields: [storeId], references: [id])
+//   billboardId           String    @db.ObjectId
+//   billboard             Billboard @relation(fields: [billboardId], references: [id])
+//   name                  String
+//   categoryDescription   String    @default("")
+//   createdAt             DateTime  @default(now())
+//   updatedAt             DateTime  @updatedAt
+//   products              Product[] @relation("CategoryToProduct")
+//   fields                Field[]   // Relation to dynamic fields
+
+//   @@index([storeId])
+//   @@index([billboardId])
+// }
+
+// model Field {
+//   id         String   @id @default(auto()) @map("_id") @db.ObjectId
+//   categoryId String   @db.ObjectId
+//   category   Category @relation(fields: [categoryId], references: [id])
+//   fieldName  String
+//   fieldType  String // Generic type identifier for the field
+//   options    String[] // Array of options for checklist fields
+
+//   @@index([categoryId])
+// }
+
+// model Product {
+//   id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+//   storeId             String      @db.ObjectId
+//   store               Store       @relation("StoreToProduct", fields: [storeId], references: [id])
+//   categoryId         String      @db.ObjectId
+//   category           Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
+//   name                String
+//   price               Float
+//   productDescription  String      @default("")
+//   isFeatured          Boolean     @default(false)
+//   isArchived          Boolean     @default(false)
+//   images              Image[]
+//   orderItems          OrderItem[]
+//   productReviews      ProductReview[] // New relation for product reviews
+//   userReviews         UserReview[]    // New relation for user reviews
+//   createdAt           DateTime    @default(now())
+//   updatedAt           DateTime    @updatedAt
+
+//   @@index([storeId])
+//   @@index([categoryId])
+// }
+
+// model Image {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   productId String   @db.ObjectId
+//   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+//   url       String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([productId])
+// }
+
+// model Order {
+//   id         String      @id @default(auto()) @map("_id") @db.ObjectId
+//   storeId    String      @db.ObjectId
+//   store      Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+//   orderItems OrderItem[]
+//   isPaid     Boolean     @default(false)
+//   phone      String      @default("")
+//   address    String      @default("")
+//   status     OrderStatus @default(ORDERED) // New status field
+//   createdAt  DateTime    @default(now())
+//   updatedAt  DateTime    @updatedAt
+
+//   @@index([storeId])
+// }
+
+// model OrderItem {
+//   id        String  @id @default(auto()) @map("_id") @db.ObjectId
+//   orderId   String  @db.ObjectId
+//   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+//   productId String  @db.ObjectId
+//   product   Product @relation(fields: [productId], references: [id])
+
+//   @@index([orderId])
+//   @@index([productId])
+// }
+
+// model ProductReview { // Model for product ratings
+//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+//   productId   String   @db.ObjectId
+//   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+//   rating      Int      // Rating out of five
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   @@index([productId])
+// }
+
+// model UserReview { // Model for user comments and ratings
+//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+//   productId   String   @db.ObjectId
+//   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+//   userId      String   // Assuming you have a User model to link
+//   rating      Int      // Rating out of five
+//   comment     String   @default("")
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   @@index([productId])
+// }
+
+// // Enum for order status
+// enum OrderStatus {
+//   ORDERED
+//   PROCESSING
+//   DONE
+// }
