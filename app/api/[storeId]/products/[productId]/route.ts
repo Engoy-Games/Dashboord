@@ -51,7 +51,7 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { name, price, categoryId, images, isFeatured, isArchived } = body;
+    const { name, price, categoryId, images, isFeatured, isArchived, productDescription } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -98,6 +98,7 @@ export async function PATCH(
         categoryId,
         isFeatured,
         isArchived,
+        productDescription, // Include productDescription in the update
         images: {
           deleteMany: {},
         },
@@ -156,7 +157,7 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const product = await prismadb.product.deleteMany({
+    const product = await prismadb.product.delete({
       where: {
         id: params.productId,
       },

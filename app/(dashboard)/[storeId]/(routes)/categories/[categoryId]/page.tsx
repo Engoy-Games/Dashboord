@@ -1,19 +1,19 @@
 import { ObjectId } from 'bson'; // Import ObjectId to validate categoryId
 
-import prismadb from '@/lib/prismadb'
+import prismadb from '@/lib/prismadb';
 
-import { CategoryForm } from './components/category-form'
+import { CategoryForm } from './components/category-form';
 
 const CategoryPage = async ({
   params,
 }: {
   params: {
-    categoryId: string
-    storeId: string
-  }
+    categoryId: string;
+    storeId: string;
+  };
 }) => {
   // Check if categoryId is "new" or a valid ObjectId
-  const isNewCategory = params.categoryId === "new";
+  const isNewCategory = params.categoryId === 'new';
   const categoryId = ObjectId.isValid(params.categoryId) ? params.categoryId : null;
 
   let category = null;
@@ -23,6 +23,9 @@ const CategoryPage = async ({
     category = await prismadb.category.findUnique({
       where: {
         id: categoryId,
+      },
+      include: {
+        fields: true, // Include fields associated with the category
       },
     });
   }

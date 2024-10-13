@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 import prismadb from '@/lib/prismadb'
@@ -17,6 +17,7 @@ export async function POST(
       images,
       isFeatured,
       isArchived,
+      productDescription, // Added productDescription
     } = body
 
     if (!userId) {
@@ -62,6 +63,7 @@ export async function POST(
         isFeatured,
         isArchived,
         storeId: params.storeId,
+        productDescription, // Included productDescription
         images: {
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
@@ -112,7 +114,13 @@ export async function GET(
       },
     })
 
-    return new NextResponse(JSON.stringify(products), {
+    // Include productDescription in the response if needed
+    const productsWithDescription = products.map(product => ({
+      ...product,
+      productDescription: product.productDescription || null, // Ensure productDescription is included
+    }))
+
+    return new NextResponse(JSON.stringify(productsWithDescription), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
@@ -124,3 +132,4 @@ export async function GET(
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
+  

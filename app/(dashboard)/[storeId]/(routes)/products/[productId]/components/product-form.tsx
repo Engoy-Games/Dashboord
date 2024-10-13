@@ -44,6 +44,7 @@ const formSchema = z.object({
     .array(),
   price: z.coerce.number().positive(),
   categoryId: z.string().nonempty(),
+  productDescription: z.string().optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
 })
@@ -87,6 +88,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           images: [],
           price: 0,
           categoryId: '',
+          productDescription: '',
           isFeatured: false,
           isArchived: false,
         },
@@ -261,6 +263,25 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         ))}
                       </SelectContent>
                     </Select>
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="productDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Description</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isLoading}
+                      placeholder="Enter a description for the product"
+                    />
                   </FormControl>
 
                   <FormMessage />
