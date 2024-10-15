@@ -1,6 +1,6 @@
 // File: api/[storeId]/orders/[orderId]/route.ts
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 import prismadb from '@/lib/prismadb';

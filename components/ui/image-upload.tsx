@@ -1,11 +1,10 @@
 'use client'
 
-// eslint-disable-next-line simple-import-sort/imports
 import { useEffect, useState } from 'react'
 
 import { ImagePlus, Trash } from 'lucide-react'
-import { CldUploadWidget } from 'next-cloudinary'
 import Image from 'next/image'
+import { CldUploadWidget } from 'next-cloudinary'
 
 import { Button } from '@/components/ui/button'
 
@@ -28,8 +27,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsMounted(true)
   }, [])
 
-  const onUpload = (result: any) => {
-    onChange(result.info.secure_url)
+  const handleUploadSuccess = (result: any) => {
+    const url = result.info.secure_url
+    console.log('Uploaded Image URL:', url) // Log the URL
+    onChange(url)
   }
 
   if (!isMounted) {
@@ -52,32 +53,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 size="icon"
               >
                 <Trash className="w-4 h-4" />
-              </Button>x
+              </Button>
             </div>
 
-            <Image fill className="object-cover" alt="Image" src={url} />
+            {url ? (
+              <Image fill className="object-cover" alt="Uploaded Image" src={url} />
+            ) : (
+              <p>Image failed to load</p>
+            )}
           </div>
         ))}
       </div>
 
-      <CldUploadWidget onUpload={onUpload} uploadPreset="l1oprsvm">
-        {({ open }) => {
-          const onClick = () => {
-            open()
-          }
-
-          return (
-            <Button
-              type="button"
-              disabled={disabled}
-              variant="secondary"
-              onClick={onClick}
-            >
-              <ImagePlus className="h-4 w-4 mr-2" />
-              Upload an Image
-            </Button>
-          )
-        }}
+      <CldUploadWidget onSuccess={handleUploadSuccess} uploadPreset="l1oprsvm">
+        {({ open }) => (
+          <Button
+            type="button"
+            disabled={disabled}
+            variant="secondary"
+            onClick={() => open()}
+          >
+            <ImagePlus className="h-4 w-4 mr-2" />
+            Upload an Image
+          </Button>
+        )}
       </CldUploadWidget>
     </div>
   )
