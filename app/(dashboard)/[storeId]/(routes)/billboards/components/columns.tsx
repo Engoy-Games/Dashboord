@@ -8,8 +8,10 @@ export type BillboardColumn = {
   id: string
   label: string
   createdAt: string
+  isBillboardActive: boolean // Add the new field here
 }
 
+// Updated columns definition to reflect the new data structure
 export const columns: ColumnDef<BillboardColumn>[] = [
   {
     accessorKey: 'label',
@@ -18,6 +20,11 @@ export const columns: ColumnDef<BillboardColumn>[] = [
   {
     accessorKey: 'createdAt',
     header: 'Date',
+  },
+  {
+    accessorKey: 'isBillboardActive', // Adding isBillboardActive to the columns
+    header: 'Active', // You can change this to a more descriptive title if needed
+    cell: ({ row }) => (row.getValue('isBillboardActive') ? 'Yes' : 'No'), // Display Yes/No based on the boolean value
   },
   {
     id: 'actions',

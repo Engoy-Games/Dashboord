@@ -47,7 +47,7 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { name, billboardId, categoryDescription, fields } = body;
+    const { name, billboardId, categoryDescription, fields, categoryType } = body; // Include categoryType
 
     // Authorization check
     if (!userId) {
@@ -81,13 +81,14 @@ export async function PATCH(
     // Log fields before the upsert
     console.log('Fields being updated:', fields);
 
-    // Update the category with fields
+    // Update the category with fields and categoryType
     const updatedCategory = await prismadb.category.update({
       where: { id: params.categoryId },
       data: {
         name,
         billboardId,
         categoryDescription,
+        categoryType, // Update categoryType
         fields: {
           upsert: fields
             .filter((field: { id: any; }) => field.id) // Filter out fields with an empty id
@@ -122,8 +123,6 @@ export async function PATCH(
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
-
-
 
 // DELETE endpoint to remove a category
 export async function DELETE(

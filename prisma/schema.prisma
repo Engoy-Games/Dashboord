@@ -20,33 +20,43 @@ model Store {
 }
 
 model Billboard {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  storeId    String     @db.ObjectId
-  store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
-  categories Category[]
-  label      String
-  imageUrl   String
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  storeId           String     @db.ObjectId
+  store             Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
+  categories        Category[]
+  label             String
+  imageUrl          String
+  isBillboardActive Boolean    @default(false) //if the billboard is active it will work as billboard if not it will work aa a category image
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
   @@index([storeId])
 }
 
 model Category {
-  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
-  storeId             String    @db.ObjectId
-  store               Store     @relation("StoreToCategory", fields: [storeId], references: [id])
-  billboardId         String    @db.ObjectId
-  billboard           Billboard @relation(fields: [billboardId], references: [id])
+  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
+  storeId             String       @db.ObjectId
+  store               Store        @relation("StoreToCategory", fields: [storeId], references: [id])
+  billboardId         String       @db.ObjectId
+  billboard           Billboard    @relation(fields: [billboardId], references: [id])
   name                String
-  categoryDescription String    @default("")
+  categoryDescription String       @default("")
   fields              Field[]
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  products            Product[] @relation("CategoryToProduct")
+  categoryType        CategoryType @default(SHIPPING_LIVE_PROGRAMS) // Default value set to one of the enum options
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  products            Product[]    @relation("CategoryToProduct")
 
   @@index([storeId])
   @@index([billboardId])
+}
+
+enum CategoryType {
+  SHIPPING_LIVE_PROGRAMS
+  SHIPPING_GAMES
+  SHIPPING_GIFT_CARDS
+  SHIPPING_GAMES_CARDS
+  SHIPPING_DIGITAL_SUBSCRIPTIONS
 }
 
 model Field {

@@ -13,9 +13,11 @@ import * as z from 'zod'
 
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,6 +31,7 @@ import { Separator } from '@/components/ui/separator'
 const formSchema = z.object({
   label: z.string().nonempty("Label is required"),
   imageUrl: z.string().url("Invalid URL").nonempty("Image URL is required"),
+  isBillboardActive: z.boolean(),
 })
 
 type BillboardFormValues = z.infer<typeof formSchema>
@@ -56,6 +59,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     defaultValues: initialData || {
       label: '',
       imageUrl: '',
+      isBillboardActive: false, // Set to false for new billboards
     },
   })
 
@@ -168,6 +172,30 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
               )}
             />
           </div>
+
+          {/* Add the isBillboardActive checkbox */}
+          <FormField
+            control={form.control}
+            name="isBillboardActive"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Active</FormLabel>
+                  <FormDescription>
+                    This billboard will be visible to users as a billboard slider, not as a Category Image.
+                  </FormDescription>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button disabled={isLoading} className="ml-auto" type="submit">
             {isLoading ? 'Loading...' : action}

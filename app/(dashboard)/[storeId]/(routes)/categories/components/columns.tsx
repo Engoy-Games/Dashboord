@@ -1,18 +1,19 @@
-'use client'
+'use client';
 
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef } from '@tanstack/react-table';
 
-import { CellAction } from './cell-action'
+import { CellAction } from './cell-action';
 
+// Updated CategoryColumn type to include categoryType
 export type CategoryColumn = {
   id: string;
   name: string;
   categoryDescription: string;
   billboardLabel: string;
   createdAt: string;
-  fields: { fieldName: string; fieldType: string; options: string[] }[]; // New fields property
-}
-
+  categoryType: string; // Add categoryType here
+  fields: { fieldName: string; fieldType: string; options: string[] }[]; // Fields property
+};
 
 export const columns: ColumnDef<CategoryColumn>[] = [
   {
@@ -31,6 +32,10 @@ export const columns: ColumnDef<CategoryColumn>[] = [
   {
     accessorKey: 'createdAt',
     header: 'Date',
+  },
+  {
+    accessorKey: 'categoryType', // Add categoryType to display in the table
+    header: 'Category Type',
   },
   {
     id: 'fields',

@@ -38,7 +38,7 @@ export async function PATCH(
   try {
     const { userId } = auth()
     const body = await req.json()
-    const { label, imageUrl } = body
+    const { label, imageUrl, isBillboardActive } = body // Added isBillboardActive
 
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
@@ -67,13 +67,14 @@ export async function PATCH(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const billboard = await prismadb.billboard.updateMany({
+    const billboard = await prismadb.billboard.update({
       where: {
         id: params.billboardId,
       },
       data: {
         label,
         imageUrl,
+        isBillboardActive: isBillboardActive !== undefined ? isBillboardActive : undefined, // Update if provided
       },
     })
 
@@ -116,7 +117,7 @@ export async function DELETE(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const billboard = await prismadb.billboard.deleteMany({
+    const billboard = await prismadb.billboard.delete({
       where: {
         id: params.billboardId,
       },

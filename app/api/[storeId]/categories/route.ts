@@ -8,7 +8,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
   try {
     const { userId } = auth(); // Get the authenticated user's ID
     const body = await req.json(); // Parse the request body
-    const { name, billboardId, categoryDescription, fields } = body; // Include fields
+    const { name, billboardId, categoryDescription, fields, categoryType } = body; // Include categoryType
 
     // Validate the request data
     if (!userId) {
@@ -25,6 +25,10 @@ export async function POST(req: Request, { params }: { params: { storeId: string
 
     if (!params.storeId) {
       return new NextResponse('Missing storeId', { status: 400 });
+    }
+
+    if (!categoryType) {
+      return new NextResponse('Missing categoryType', { status: 400 }); // Validate categoryType
     }
 
     // Validate fields (if provided)
@@ -52,12 +56,13 @@ export async function POST(req: Request, { params }: { params: { storeId: string
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Create a new category including the fields
+    // Create a new category including the fields and categoryType
     const category = await prismadb.category.create({
       data: {
         name,
         billboardId,
         categoryDescription,
+        categoryType, // Include categoryType in the creation
         storeId: params.storeId,
         fields: {
           create: fields, // Use create to add fields

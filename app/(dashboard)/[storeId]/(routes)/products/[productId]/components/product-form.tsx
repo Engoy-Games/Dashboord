@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Category, Image, Product } from '@prisma/client'
-import axios from 'axios'
-import { Trash } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
-import * as z from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Category, Image, Product } from "@prisma/client";
+import axios from "axios";
+import { Trash } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import * as z from "zod";
 
-import { AlertModal } from '@/components/modals/alert-modal'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { AlertModal } from "@/components/modals/alert-modal";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -22,18 +22,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Heading } from '@/components/ui/heading'
-import ImageUpload from '@/components/ui/image-upload'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/form";
+import { Heading } from "@/components/ui/heading";
+import ImageUpload from "@/components/ui/image-upload";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   name: z.string().nonempty(),
@@ -47,34 +47,35 @@ const formSchema = z.object({
   productDescription: z.string().optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
-})
+});
 
-type ProductFormValues = z.infer<typeof formSchema>
+type ProductFormValues = z.infer<typeof formSchema>;
 
 interface ProductFormProps {
   initialData:
     | (Product & {
-        images: Image[]
+        images: Image[];
       })
-    | null
+    | null;
 
-  categories: Category[]
+  categories: Category[];
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
   categories,
 }) => {
-  const params = useParams()
-  const router = useRouter()
+  const params = useParams();
+  const router = useRouter();
 
-  const title = initialData ? 'Edit Product' : 'New Product'
-  const description = initialData ? 'Edit a Product' : 'Add a new product'
-  const toastMessage = initialData ? 'Product updated.' : 'Product created.'
-  const action = initialData ? 'Save changes' : 'Create product'
+  const title = initialData ? "Edit Product" : "New Product";
+  const description = initialData ? "Edit a Product" : "Add a new product";
+  const toastMessage = initialData ? "Product updated." : "Product created.";
+  const action = initialData ? "Save changes" : "Create product";
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // Track search input
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
@@ -84,61 +85,67 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           price: parseFloat(String(initialData?.price)),
         }
       : {
-          name: '',
+          name: "",
           images: [],
           price: 0,
-          categoryId: '',
-          productDescription: '',
+          categoryId: "",
+          productDescription: "",
           isFeatured: false,
           isArchived: false,
         },
-  })
+  });
 
+
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  
   const onSubmit = async (values: ProductFormValues) => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/products/${params.productId}`,
-          values,
-        )
+          values
+        );
       } else {
-        await axios.post(`/api/${params.storeId}/products`, values)
+        await axios.post(`/api/${params.storeId}/products`, values);
       }
 
-      router.refresh()
-      router.push(`/${params.storeId}/products`)
-      toast.success(toastMessage)
+      router.refresh();
+      router.push(`/${params.storeId}/products`);
+      toast.success(toastMessage);
     } catch (error) {
-      toast.error('Something went wrong.')
+      toast.error("Something went wrong.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const onDelete = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      await axios.delete(`/api/${params.storeId}/products/${params.productId}`)
-      router.refresh()
-      router.push(`/${params.storeId}/products`)
-      toast.success('Product deleted.')
+      await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
+      router.refresh();
+      router.push(`/${params.storeId}/products`);
+      toast.success("Product deleted.");
     } catch (error) {
-      toast.error('Something went wrong.')
+      toast.error("Something went wrong.");
     } finally {
-      setIsLoading(false)
-      setIsOpen(false)
+      setIsLoading(false);
+      setIsOpen(false);
     }
-  }
+  };
 
   return (
     <>
       <AlertModal
         isOpen={isOpen}
         onClose={() => {
-          setIsOpen(false)
+          setIsOpen(false);
         }}
         onConfirm={onDelete}
         isLoading={isLoading}
@@ -152,7 +159,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             variant="destructive"
             size="icon"
             onClick={() => {
-              setIsOpen(true)
+              setIsOpen(true);
             }}
             disabled={isLoading}
           >
@@ -247,24 +254,35 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       value={field.value}
                       defaultValue={field.value}
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            defaultValue={field.value}
-                            placeholder="Select a category"
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+
+                      <SelectContent className="max-h-64 overflow-y-auto">
+                        <div className="p-2">
+                          <Input
+                            type="text"
+                            placeholder="Search category"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
+                        </div>
+
+                        {filteredCategories.length > 0 ? (
+                          filteredCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <p className="p-2 text-center text-gray-500">
+                            No categories found
+                          </p>
+                        )}
                       </SelectContent>
                     </Select>
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -346,5 +364,5 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         </form>
       </Form>
     </>
-  )
-}
+  );
+};

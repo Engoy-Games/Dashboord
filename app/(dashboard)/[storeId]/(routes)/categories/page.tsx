@@ -27,6 +27,7 @@ const CategoriesPage = async ({ params }: { params: { storeId: string } }) => {
     categoryDescription: category.categoryDescription,
     billboardLabel: category.billboard?.label || "N/A", // Fallback in case of missing billboard
     createdAt: format(category.createdAt, "MMMM do, yyyy"),
+    categoryType: category.categoryType, // Include the categoryType
     fields: category.fields.map((field) => ({
       fieldName: field.fieldName,
       fieldType: field.fieldType,

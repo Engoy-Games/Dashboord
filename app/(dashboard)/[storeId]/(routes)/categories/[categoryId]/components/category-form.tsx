@@ -36,7 +36,16 @@ import { Separator } from "@/components/ui/separator";
 const formSchema = z.object({
   name: z.string().nonempty(),
   billboardId: z.string().nonempty(),
-  categoryDescription: z.string().optional(), // Add categoryDescription field
+  categoryDescription: z.string().optional(),
+  categoryType: z
+    .enum([
+      "SHIPPING_LIVE_PROGRAMS",
+      "SHIPPING_GAMES",
+      "SHIPPING_GIFT_CARDS",
+      "SHIPPING_GAMES_CARDS",
+      "SHIPPING_DIGITAL_SUBSCRIPTIONS",
+    ])
+    .optional(), // Add categoryType field
 });
 
 type CategoryFormValues = z.infer<typeof formSchema>;
@@ -44,15 +53,15 @@ type CategoryFormValues = z.infer<typeof formSchema>;
 interface CategoryField {
   fieldName: string;
   fieldType: string;
-  options: string[]; // Options for dropdown fields
+  options: string[];
 }
 
 interface CategoryWithFields extends Category {
-  fields?: CategoryField[]; // Add fields property to Category type
+  fields?: CategoryField[];
 }
 
 interface CategoryFormProps {
-  initialData: CategoryWithFields | null; // Update to use CategoryWithFields
+  initialData: CategoryWithFields | null;
   billboards: Billboard[];
 }
 
@@ -73,6 +82,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   const [fields, setFields] = useState<CategoryField[]>(
     initialData?.fields || []
   );
+  const [searchTerm, setSearchTerm] = useState("");
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(formSchema),
@@ -80,16 +90,15 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
       name: initialData?.name || "",
       billboardId: initialData?.billboardId || "",
       categoryDescription: initialData?.categoryDescription || "",
+      categoryType: initialData?.categoryType || undefined, // Set default value for categoryType
     },
   });
 
   const onSubmit = async (values: CategoryFormValues) => {
     try {
       setIsLoading(true);
-
-      // Log the data being submitted
       const dataToSubmit = { ...values, fields };
-      console.log("Submitting data:", dataToSubmit); // Log the data
+      console.log("Submitting data:", dataToSubmit);
 
       if (initialData) {
         await axios.patch(
@@ -104,12 +113,16 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
       router.push(`/${params.storeId}/categories`);
       toast.success(toastMessage);
     } catch (error) {
-      console.error("Submission error mina:", error); // Log the error if any
+      console.error("Submission error mina:", error);
       toast.error("Something went wrong.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const filteredBillboards = billboards.filter((billboard) =>
+    billboard.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const onDelete = async () => {
     try {
@@ -140,7 +153,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
   const handleAddOption = (index: number) => {
     const updatedFields = [...fields];
-    updatedFields[index].options.push(""); // Add an empty string for the new option
+    updatedFields[index].options.push("");
     setFields(updatedFields);
   };
 
@@ -150,7 +163,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     value: string
   ) => {
     const updatedFields = [...fields];
-    updatedFields[fieldIndex].options[optionIndex] = value; // Update the specific option value
+    updatedFields[fieldIndex].options[optionIndex] = value;
     setFields(updatedFields);
   };
 
@@ -227,16 +240,72 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                       disabled={isLoading}
                       onValueChange={inputProps.onChange}
                       value={inputProps.value}
+                      defaultValue={inputProps.value} // Add defaultValue
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a billboard" />
                       </SelectTrigger>
+                      
+                      <SelectContent className="max-h-64 overflow-y-auto">
+                        <div className="p-2">
+                          <Input
+                            placeholder="Search billboards"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2" // Added styles for consistency
+                          />
+                        </div>
+                        {filteredBillboards.length > 0 ? (
+                          filteredBillboards.map((billboard) => (
+                            <SelectItem key={billboard.id} value={billboard.id}>
+                              {billboard.label}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <p className="p-2 text-center text-gray-500">
+                            No billboards found
+                          </p>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* New dropdown for categoryType */}
+            <FormField
+              control={form.control}
+              name="categoryType"
+              render={({ field: inputProps }) => (
+                <FormItem>
+                  <FormLabel>Category Type</FormLabel>
+                  <FormControl>
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={inputProps.onChange}
+                      value={inputProps.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category type" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {billboards.map((billboard) => (
-                          <SelectItem key={billboard.id} value={billboard.id}>
-                            {billboard.label}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="SHIPPING_LIVE_PROGRAMS">
+                          Shipping Live Programs
+                        </SelectItem>
+                        <SelectItem value="SHIPPING_GAMES">
+                          Shipping Games
+                        </SelectItem>
+                        <SelectItem value="SHIPPING_GIFT_CARDS">
+                          Shipping Gift Cards
+                        </SelectItem>
+                        <SelectItem value="SHIPPING_GAMES_CARDS">
+                          Shipping Game Cards
+                        </SelectItem>
+                        <SelectItem value="SHIPPING_DIGITAL_SUBSCRIPTIONS">
+                          Shipping Digital Subscriptions
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>

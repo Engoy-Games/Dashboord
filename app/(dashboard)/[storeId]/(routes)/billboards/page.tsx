@@ -26,6 +26,7 @@ const BillboardsPage = async ({
       id: billboard.id,
       label: billboard.label,
       createdAt: format(billboard.createdAt, 'MMMM do, yyyy'),
+      isBillboardActive: billboard.isBillboardActive, // Include the new field
     }),
   )
 

@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { userId } = auth()
     const body = await req.json()
-    const { label, imageUrl } = body
+    const { label, imageUrl, isBillboardActive } = body // Added isBillboardActive
 
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
@@ -43,6 +43,7 @@ export async function POST(
       data: {
         label,
         imageUrl,
+        isBillboardActive: isBillboardActive || false, // Default to false if not provided
         storeId: params.storeId,
       },
     })
@@ -72,6 +73,7 @@ export async function GET(
     const billboards = await prismadb.billboard.findMany({
       where: {
         storeId: params.storeId,
+        isBillboardActive: true, // Optional: Only fetch active billboards
       },
     })
 
