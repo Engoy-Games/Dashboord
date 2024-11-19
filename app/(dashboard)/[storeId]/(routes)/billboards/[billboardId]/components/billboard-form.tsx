@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Billboard } from '@prisma/client'
-import axios from 'axios'
-import { Trash } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
-import * as z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Billboard } from '@prisma/client';
+import axios from 'axios';
+import { Trash } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import * as z from 'zod';
 
-import { AlertModal } from '@/components/modals/alert-modal'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { AlertModal } from '@/components/modals/alert-modal';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -22,87 +22,95 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Heading } from '@/components/ui/heading'
-import ImageUpload from '@/components/ui/image-upload'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
+} from '@/components/ui/form';
+import { Heading } from '@/components/ui/heading';
+import ImageUpload from '@/components/ui/image-upload';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
-  label: z.string().nonempty("Label is required"),
-  imageUrl: z.string().url("Invalid URL").nonempty("Image URL is required"),
+  label: z.string().nonempty('Label is required'),
+  labelEn: z.string().nonempty('Label (EN) is required'), // Add validation for labelEn
+  imageUrl: z.string().url('Invalid URL').nonempty('Image URL is required'),
   isBillboardActive: z.boolean(),
-})
+});
 
-type BillboardFormValues = z.infer<typeof formSchema>
+type BillboardFormValues = z.infer<typeof formSchema>;
 
 interface BillboardFormProps {
-  initialData: Billboard | null
+  initialData: Billboard | null;
 }
 
 export const BillboardForm: React.FC<BillboardFormProps> = ({
   initialData,
 }) => {
-  const params = useParams()
-  const router = useRouter()
+  const params = useParams();
+  const router = useRouter();
 
-  const title = initialData ? 'Edit Billboard' : 'New Billboard'
-  const description = initialData ? 'Edit a Billboard' : 'Add a new billboard'
-  const toastMessage = initialData ? 'Billboard updated.' : 'Billboard created.'
-  const action = initialData ? 'Save changes' : 'Create billboard'
+  const title = initialData ? 'Edit Billboard' : 'New Billboard';
+  const description = initialData
+    ? 'Edit a Billboard'
+    : 'Add a new billboard';
+  const toastMessage = initialData
+    ? 'Billboard updated.'
+    : 'Billboard created.';
+  const action = initialData ? 'Save changes' : 'Create billboard';
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<BillboardFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       label: '',
+      labelEn: '', // Add default value for labelEn
       imageUrl: '',
-      isBillboardActive: false, // Set to false for new billboards
+      isBillboardActive: false,
     },
-  })
+  });
 
   const onSubmit = async (values: BillboardFormValues) => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/billboards/${params.billboardId}`,
-          values,
-        )
+          values
+        );
       } else {
-        await axios.post(`/api/${params.storeId}/billboards`, values)
+        await axios.post(`/api/${params.storeId}/billboards`, values);
       }
 
-      router.refresh()
-      router.push(`/${params.storeId}/billboards`)
-      toast.success(toastMessage)
+      router.refresh();
+      router.push(`/${params.storeId}/billboards`);
+      toast.success(toastMessage);
     } catch (error) {
-      toast.error('Something went wrong.')
+      toast.error('Something went wrong.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const onDelete = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       await axios.delete(
-        `/api/${params.storeId}/billboards/${params.billboardId}`,
-      )
-      toast.success('Billboard deleted.')
-      router.refresh()
-      router.push(`/${params.storeId}/billboards`)
+        `/api/${params.storeId}/billboards/${params.billboardId}`
+      );
+      toast.success('Billboard deleted.');
+      router.refresh();
+      router.push(`/${params.storeId}/billboards`);
     } catch (error) {
-      toast.error('Make sure you removed all categories from this billboard.')
+      toast.error(
+        'Make sure you removed all categories from this billboard.'
+      );
     } finally {
-      setIsLoading(false)
-      setIsOpen(false)
+      setIsLoading(false);
+      setIsOpen(false);
     }
-  }
+  };
 
   return (
     <>
@@ -171,9 +179,26 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="labelEn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Label (EN)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isLoading}
+                      placeholder="Billboard label (EN)"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          {/* Add the isBillboardActive checkbox */}
           <FormField
             control={form.control}
             name="isBillboardActive"
@@ -189,7 +214,8 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                 <div className="space-y-1 leading-none">
                   <FormLabel>Active</FormLabel>
                   <FormDescription>
-                    This billboard will be visible to users as a billboard slider, not as a Category Image.
+                    This billboard will be visible to users as a billboard
+                    slider, not as a Category Image.
                   </FormDescription>
                 </div>
                 <FormMessage />
@@ -203,5 +229,5 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         </form>
       </Form>
     </>
-  )
-}
+  );
+};

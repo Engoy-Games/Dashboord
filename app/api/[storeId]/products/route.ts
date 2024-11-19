@@ -12,20 +12,22 @@ export async function POST(
     const body = await req.json()
     const {
       name,
+      nameEn, // Added English name
       price,
       categoryId,
       images,
       isFeatured,
       isArchived,
       productDescription, // Added productDescription
+      productDescriptionEn, // Added English product description
     } = body
 
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    if (!name) {
-      return new NextResponse('Missing name', { status: 400 })
+    if (!name || !nameEn) { // Check for both names
+      return new NextResponse('Missing name or nameEn', { status: 400 })
     }
 
     if (!price) {
@@ -58,12 +60,14 @@ export async function POST(
     const product = await prismadb.product.create({
       data: {
         name,
+        nameEn, // Store the English name
         price,
         categoryId,
         isFeatured,
         isArchived,
         storeId: params.storeId,
-        productDescription, // Included productDescription
+        productDescription,
+        productDescriptionEn, // Store the English description
         images: {
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
@@ -114,10 +118,11 @@ export async function GET(
       },
     })
 
-    // Include productDescription in the response if needed
+    // Include both productDescription and productDescriptionEn in the response
     const productsWithDescription = products.map(product => ({
       ...product,
-      productDescription: product.productDescription || null, // Ensure productDescription is included
+      productDescription: product.productDescription || null,
+      productDescriptionEn: product.productDescriptionEn || null, // Ensure productDescriptionEn is included
     }))
 
     return new NextResponse(JSON.stringify(productsWithDescription), {
@@ -132,4 +137,3 @@ export async function GET(
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
-  

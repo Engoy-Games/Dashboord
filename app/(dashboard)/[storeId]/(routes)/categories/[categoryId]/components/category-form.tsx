@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import TextareaAutosize from "react-textarea-autosize";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Billboard, Category } from "@prisma/client";
@@ -35,8 +36,10 @@ import { Separator } from "@/components/ui/separator";
 // Update the validation schema to include categoryDescription
 const formSchema = z.object({
   name: z.string().nonempty(),
+  nameEn: z.string().nonempty(),
   billboardId: z.string().nonempty(),
   categoryDescription: z.string().optional(),
+  categoryDescriptionEn: z.string().optional(),
   categoryType: z
     .enum([
       "SHIPPING_LIVE_PROGRAMS",
@@ -88,8 +91,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
+      nameEn: initialData?.nameEn || "",
       billboardId: initialData?.billboardId || "",
       categoryDescription: initialData?.categoryDescription || "",
+      categoryDescriptionEn: initialData?.categoryDescriptionEn || "",
       categoryType: initialData?.categoryType || undefined, // Set default value for categoryType
     },
   });
@@ -229,6 +234,25 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
               )}
             />
 
+            {/* NameEn */}
+            <FormField
+              control={form.control}
+              name="nameEn"
+              render={({ field: inputProps }) => (
+                <FormItem>
+                  <FormLabel>Name (EN)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...inputProps}
+                      disabled={isLoading}
+                      placeholder="Category name (EN)"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="billboardId"
@@ -245,7 +269,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                       <SelectTrigger>
                         <SelectValue placeholder="Select a billboard" />
                       </SelectTrigger>
-                      
+
                       <SelectContent className="max-h-64 overflow-y-auto">
                         <div className="p-2">
                           <Input
@@ -313,7 +337,11 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                 </FormItem>
               )}
             />
+          </div>
 
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-8">
             <FormField
               control={form.control}
               name="categoryDescription"
@@ -321,10 +349,34 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input
+                    <TextareaAutosize
                       {...inputProps}
                       disabled={isLoading}
                       placeholder="Category description"
+                      minRows={4}
+                      style={{ width: "100%" }}
+                      className="text-right p-2 rounded-xl border-2 border-[#dadcdf] focus:outline-none focus:border-[#747878] foucs:border-4 focus:ring-[#5e5e5e] focus:ring-offset-2 ring-offset-transparent"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categoryDescriptionEn"
+              render={({ field: inputProps }) => (
+                <FormItem>
+                  <FormLabel>Description (EN)</FormLabel>
+                  <FormControl>
+                    <TextareaAutosize
+                      {...inputProps}
+                      disabled={isLoading}
+                      placeholder="Category description (EN)"
+                      minRows={4}
+                      style={{ width: "100%" }}
+                      className="text-left p-2 rounded-xl border-2 border-[#dadcdf] focus:outline-none focus:border-[#747878] foucs:border-4 focus:ring-[#5e5e5e] focus:ring-offset-2 ring-offset-transparent"
                     />
                   </FormControl>
                   <FormMessage />

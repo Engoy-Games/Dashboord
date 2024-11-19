@@ -19,7 +19,7 @@ export async function GET(
       },
       include: {
         billboard: true,
-        fields: true, // This includes the related fields
+        fields: true,
       },
     });
 
@@ -47,7 +47,15 @@ export async function PATCH(
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { name, billboardId, categoryDescription, fields, categoryType } = body; // Include categoryType
+    const {
+      name,
+      nameEn,
+      billboardId,
+      categoryDescription,
+      categoryDescriptionEn,
+      fields,
+      categoryType,
+    } = body;
 
     // Authorization check
     if (!userId) {
@@ -55,7 +63,7 @@ export async function PATCH(
     }
 
     // Required fields check
-    if (!name || !billboardId || !params.categoryId) {
+    if (!name || !nameEn || !billboardId || !params.categoryId) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
 
@@ -78,33 +86,33 @@ export async function PATCH(
       return new NextResponse('Category not found', { status: 404 });
     }
 
-    // Log fields before the upsert
     console.log('Fields being updated:', fields);
 
-    // Update the category with fields and categoryType
     const updatedCategory = await prismadb.category.update({
       where: { id: params.categoryId },
       data: {
         name,
+        nameEn,
         billboardId,
         categoryDescription,
-        categoryType, // Update categoryType
+        categoryDescriptionEn,
+        categoryType,
         fields: {
           upsert: fields
-            .filter((field: { id: any; }) => field.id) // Filter out fields with an empty id
-            .map((field: { id: any; fieldName: any; fieldType: any; options: any; OrderField: any; }) => ({
-              where: { id: field.id }, // Upsert requires an id for existing fields
+            .filter((field: { id: any }) => field.id)
+            .map((field: { id: any; fieldName: any; fieldType: any; options: any; OrderField: any }) => ({
+              where: { id: field.id },
               update: {
                 fieldName: field.fieldName,
                 fieldType: field.fieldType,
                 options: field.options,
-                OrderField: field.OrderField ? field.OrderField : undefined,
+                OrderField: field.OrderField || undefined,
               },
               create: {
                 fieldName: field.fieldName,
                 fieldType: field.fieldType,
                 options: field.options,
-                OrderField: field.OrderField ? field.OrderField : undefined,
+                OrderField: field.OrderField || undefined,
               },
             })),
         },
@@ -119,7 +127,6 @@ export async function PATCH(
     });
   } catch (error) {
     console.error('[CATEGORY_PATCH]', error);
-    console.error('Error details:', (error as any).response?.data);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
@@ -161,14 +168,12 @@ export async function DELETE(
       return new NextResponse('Category not found', { status: 404 });
     }
 
-    // Step 1: Delete or update fields associated with this category
     await prismadb.field.deleteMany({
       where: {
-        categoryId: params.categoryId, // Adjust the query to match your relation
+        categoryId: params.categoryId,
       },
     });
 
-    // Step 2: Delete the category itself
     const deletedCategory = await prismadb.category.delete({
       where: {
         id: params.categoryId,

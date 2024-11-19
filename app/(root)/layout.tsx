@@ -28,6 +28,7 @@ export default async function SetupLayout({
   //   },
   // })
 
+  // disaple if you want to add new users to the store
   if (store) {
     redirect(`/${store.id}`)
   }

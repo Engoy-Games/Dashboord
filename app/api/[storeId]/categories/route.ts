@@ -8,15 +8,23 @@ export async function POST(req: Request, { params }: { params: { storeId: string
   try {
     const { userId } = auth(); // Get the authenticated user's ID
     const body = await req.json(); // Parse the request body
-    const { name, billboardId, categoryDescription, fields, categoryType } = body; // Include categoryType
+    const {
+      name,
+      nameEn, // Include nameEn
+      billboardId,
+      categoryDescription,
+      categoryDescriptionEn, // Include categoryDescriptionEn
+      fields,
+      categoryType,
+    } = body;
 
     // Validate the request data
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    if (!name) {
-      return new NextResponse('Missing name', { status: 400 });
+    if (!name || !nameEn) {
+      return new NextResponse('Missing name or nameEn', { status: 400 });
     }
 
     if (!billboardId) {
@@ -28,7 +36,7 @@ export async function POST(req: Request, { params }: { params: { storeId: string
     }
 
     if (!categoryType) {
-      return new NextResponse('Missing categoryType', { status: 400 }); // Validate categoryType
+      return new NextResponse('Missing categoryType', { status: 400 });
     }
 
     // Validate fields (if provided)
@@ -56,13 +64,15 @@ export async function POST(req: Request, { params }: { params: { storeId: string
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Create a new category including the fields and categoryType
+    // Create a new category including the fields, nameEn, and categoryDescriptionEn
     const category = await prismadb.category.create({
       data: {
         name,
+        nameEn, // Include nameEn in creation
         billboardId,
         categoryDescription,
-        categoryType, // Include categoryType in the creation
+        categoryDescriptionEn, // Include categoryDescriptionEn in creation
+        categoryType,
         storeId: params.storeId,
         fields: {
           create: fields, // Use create to add fields
@@ -90,7 +100,7 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
       return new NextResponse('Missing storeId', { status: 400 });
     }
 
-    // Fetch categories including their fields
+    // Fetch categories including their fields and new fields
     const categories = await prismadb.category.findMany({
       where: {
         storeId: params.storeId,

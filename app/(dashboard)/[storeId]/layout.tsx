@@ -26,6 +26,7 @@ export default async function DashboardLayout({
     },
   })
 
+  // If the store doesn't exist or doesn't belong to the user, redirect to the homepage
   if (!store) {
     redirect('/')
   }

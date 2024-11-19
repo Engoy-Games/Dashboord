@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import TextareaAutosize from "react-textarea-autosize";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category, Image, Product } from "@prisma/client";
@@ -37,6 +38,7 @@ import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   name: z.string().nonempty(),
+  nameEn: z.string().nonempty(),
   images: z
     .object({
       url: z.string(),
@@ -45,6 +47,7 @@ const formSchema = z.object({
   price: z.coerce.number().positive(),
   categoryId: z.string().nonempty(),
   productDescription: z.string().optional(),
+  productDescriptionEn: z.string().optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
 });
@@ -86,21 +89,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }
       : {
           name: "",
+          nameEn: "",
           images: [],
           price: 0,
           categoryId: "",
           productDescription: "",
+          productDescriptionEn: "",
           isFeatured: false,
           isArchived: false,
         },
   });
 
-
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  
   const onSubmit = async (values: ProductFormValues) => {
     try {
       setIsLoading(true);
@@ -223,6 +226,25 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
             <FormField
               control={form.control}
+              name="nameEn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name (English)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isLoading}
+                      placeholder="Product name (English)"
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="price"
               render={({ field }) => (
                 <FormItem>
@@ -290,25 +312,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
             <FormField
               control={form.control}
-              name="productDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Description</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isLoading}
-                      placeholder="Enter a description for the product"
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="isFeatured"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
@@ -357,6 +360,54 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               )}
             />
           </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-8">
+            <FormField
+              control={form.control}
+              name="productDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Description</FormLabel>
+                  <FormControl>
+                    <TextareaAutosize
+                      {...field}
+                      disabled={isLoading}
+                      placeholder="Enter a description for the product in arabic"
+                      minRows={4}
+                      style={{ width: "100%" }}
+                      className="text-right p-2 rounded-xl border-2 border-[#dadcdf] focus:outline-none focus:border-[#747878] foucs:border-4 focus:ring-[#5e5e5e] focus:ring-offset-2 ring-offset-transparent"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="productDescriptionEn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Description (English)</FormLabel>
+                  <FormControl>
+                    <TextareaAutosize
+                      {...field}
+                      disabled={isLoading}
+                      placeholder="Enter a description for the product in English"
+                      minRows={4}
+                      style={{ width: "100%" }}
+                      className="text-right p-2 rounded-xl border-2 border-[#dadcdf] focus:outline-none focus:border-[#747878] foucs:border-4 focus:ring-[#5e5e5e] focus:ring-offset-2 ring-offset-transparent"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Separator />
 
           <Button disabled={isLoading} className="ml-auto" type="submit">
             {action}

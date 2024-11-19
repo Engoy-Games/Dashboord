@@ -1,17 +1,18 @@
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 
-import prismadb from '@/lib/prismadb'
+import prismadb from '@/lib/prismadb';
 
-import { BillboardClient } from './components/client'
-import { BillboardColumn } from './components/columns'
+import { BillboardClient } from './components/client';
+import { BillboardColumn } from './components/columns';
 
 const BillboardsPage = async ({
   params,
 }: {
   params: {
-    storeId: string
-  }
+    storeId: string;
+  };
 }) => {
+  // Fetch billboards, including the new labelEn field
   const billboards = await prismadb.billboard.findMany({
     where: {
       storeId: params.storeId,
@@ -19,16 +20,16 @@ const BillboardsPage = async ({
     orderBy: {
       createdAt: 'desc',
     },
-  })
+  });
 
-  const formattedBillboards: BillboardColumn[] = billboards.map(
-    (billboard) => ({
-      id: billboard.id,
-      label: billboard.label,
-      createdAt: format(billboard.createdAt, 'MMMM do, yyyy'),
-      isBillboardActive: billboard.isBillboardActive, // Include the new field
-    }),
-  )
+  // Map over billboards to format the data, including labelEn
+  const formattedBillboards: BillboardColumn[] = billboards.map((billboard) => ({
+    id: billboard.id,
+    label: billboard.label,
+    labelEn: billboard.labelEn, // Add the new field
+    createdAt: format(billboard.createdAt, 'MMMM do, yyyy'),
+    isBillboardActive: billboard.isBillboardActive, // Include the new field
+  }));
 
   return (
     <div className="flex-col">
@@ -36,7 +37,7 @@ const BillboardsPage = async ({
         <BillboardClient data={formattedBillboards} />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BillboardsPage
+export default BillboardsPage;

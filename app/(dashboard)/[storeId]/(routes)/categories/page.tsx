@@ -24,7 +24,9 @@ const CategoriesPage = async ({ params }: { params: { storeId: string } }) => {
   const formattedCategories: CategoryColumn[] = categories.map((category) => ({
     id: category.id,
     name: category.name,
+    nameEn: category.nameEn, // Add nameEn
     categoryDescription: category.categoryDescription,
+    categoryDescriptionEn: category.categoryDescriptionEn, // Add categoryDescriptionEn
     billboardLabel: category.billboard?.label || "N/A", // Fallback in case of missing billboard
     createdAt: format(category.createdAt, "MMMM do, yyyy"),
     categoryType: category.categoryType, // Include the categoryType

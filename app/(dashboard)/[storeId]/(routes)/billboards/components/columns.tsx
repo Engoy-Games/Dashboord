@@ -1,15 +1,16 @@
-'use client'
+'use client';
 
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef } from '@tanstack/react-table';
 
-import { CellAction } from './cell-action'
+import { CellAction } from './cell-action';
 
 export type BillboardColumn = {
-  id: string
-  label: string
-  createdAt: string
-  isBillboardActive: boolean // Add the new field here
-}
+  id: string;
+  label: string;
+  labelEn: string; // Add the new field here
+  createdAt: string;
+  isBillboardActive: boolean;
+};
 
 // Updated columns definition to reflect the new data structure
 export const columns: ColumnDef<BillboardColumn>[] = [
@@ -18,16 +19,20 @@ export const columns: ColumnDef<BillboardColumn>[] = [
     header: 'Label',
   },
   {
+    accessorKey: 'labelEn', // Adding labelEn to the columns
+    header: 'Label (EN)', // Adjust the title as needed
+  },
+  {
     accessorKey: 'createdAt',
     header: 'Date',
   },
   {
-    accessorKey: 'isBillboardActive', // Adding isBillboardActive to the columns
-    header: 'Active', // You can change this to a more descriptive title if needed
-    cell: ({ row }) => (row.getValue('isBillboardActive') ? 'Yes' : 'No'), // Display Yes/No based on the boolean value
+    accessorKey: 'isBillboardActive',
+    header: 'Active',
+    cell: ({ row }) => (row.getValue('isBillboardActive') ? 'Yes' : 'No'),
   },
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />,
   },
-]
+];

@@ -31,7 +31,14 @@ export async function GET(req: Request, { params }: { params: { productId: strin
       return new NextResponse("Product not found", { status: 404 });
     }
 
-    return new NextResponse(JSON.stringify(product), {
+    // Include both nameEn and productDescriptionEn in the response
+    const productWithTranslations = {
+      ...product,
+      nameEn: product.nameEn || null,
+      productDescriptionEn: product.productDescriptionEn || null,
+    };
+
+    return new NextResponse(JSON.stringify(productWithTranslations), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -52,7 +59,17 @@ export async function PATCH(
 
     const { storeId, productId } = params;
     const body = await req.json();
-    const { name, price, categoryId, images, isFeatured, isArchived, productDescription } = body;
+    const {
+      name,
+      nameEn, // Added English name
+      price,
+      categoryId,
+      images,
+      isFeatured,
+      isArchived,
+      productDescription,
+      productDescriptionEn, // Added English product description
+    } = body;
 
     if (!name || !price || !categoryId || !images || !images.length) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -69,11 +86,13 @@ export async function PATCH(
       where: { id: productId },
       data: {
         name,
+        nameEn, // Update English name
         price,
         categoryId,
         isFeatured,
         isArchived,
         productDescription,
+        productDescriptionEn, // Update English product description
         images: { deleteMany: {} }, // Clear previous images
       },
     });

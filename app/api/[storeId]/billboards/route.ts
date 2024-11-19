@@ -10,7 +10,7 @@ export async function POST(
   try {
     const { userId } = auth()
     const body = await req.json()
-    const { label, imageUrl, isBillboardActive } = body // Added isBillboardActive
+    const { label, labelEn, imageUrl, isBillboardActive } = body // Added labelEn
 
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
@@ -18,6 +18,10 @@ export async function POST(
 
     if (!label) {
       return new NextResponse('Missing label', { status: 400 })
+    }
+
+    if (!labelEn) { // Validate labelEn
+      return new NextResponse('Missing labelEn', { status: 400 })
     }
 
     if (!imageUrl) {
@@ -42,6 +46,7 @@ export async function POST(
     const billboard = await prismadb.billboard.create({
       data: {
         label,
+        labelEn, // Save labelEn to the database
         imageUrl,
         isBillboardActive: isBillboardActive || false, // Default to false if not provided
         storeId: params.storeId,

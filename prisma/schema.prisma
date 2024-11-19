@@ -25,6 +25,7 @@ model Billboard {
   store             Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
   categories        Category[]
   label             String
+  labelEn           String
   imageUrl          String
   isBillboardActive Boolean    @default(false) //if the billboard is active it will work as billboard if not it will work aa a category image
   createdAt         DateTime   @default(now())
@@ -34,18 +35,20 @@ model Billboard {
 }
 
 model Category {
-  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
-  storeId             String       @db.ObjectId
-  store               Store        @relation("StoreToCategory", fields: [storeId], references: [id])
-  billboardId         String       @db.ObjectId
-  billboard           Billboard    @relation(fields: [billboardId], references: [id])
-  name                String
-  categoryDescription String       @default("")
-  fields              Field[]
-  categoryType        CategoryType @default(SHIPPING_LIVE_PROGRAMS) // Default value set to one of the enum options
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  products            Product[]    @relation("CategoryToProduct")
+  id                    String       @id @default(auto()) @map("_id") @db.ObjectId
+  storeId               String       @db.ObjectId
+  store                 Store        @relation("StoreToCategory", fields: [storeId], references: [id])
+  billboardId           String       @db.ObjectId
+  billboard             Billboard    @relation(fields: [billboardId], references: [id])
+  name                  String
+  nameEn                String
+  categoryDescription   String       @default("")
+  categoryDescriptionEn String       @default("")
+  fields                Field[]
+  categoryType          CategoryType @default(SHIPPING_LIVE_PROGRAMS) // Default value set to one of the enum options
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  products              Product[]    @relation("CategoryToProduct")
 
   @@index([storeId])
   @@index([billboardId])
@@ -72,20 +75,22 @@ model Field {
 }
 
 model Product {
-  id                 String      @id @default(auto()) @map("_id") @db.ObjectId
-  storeId            String      @db.ObjectId
-  store              Store       @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId         String      @db.ObjectId
-  category           Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name               String
-  price              Float
-  productDescription String      @default("")
-  isFeatured         Boolean     @default(false)
-  isArchived         Boolean     @default(false)
-  images             Image[]
-  orderItems         OrderItem[]
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  id                   String      @id @default(auto()) @map("_id") @db.ObjectId
+  storeId              String      @db.ObjectId
+  store                Store       @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId           String      @db.ObjectId
+  category             Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name                 String
+  nameEn               String
+  price                Float
+  productDescription   String      @default("")
+  productDescriptionEn String      @default("")
+  isFeatured           Boolean     @default(false)
+  isArchived           Boolean     @default(false)
+  images               Image[]
+  orderItems           OrderItem[]
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
   @@index([storeId])
   @@index([categoryId])
