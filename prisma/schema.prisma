@@ -67,6 +67,7 @@ model Field {
   categoryId String       @db.ObjectId
   category   Category     @relation(fields: [categoryId], references: [id])
   fieldName  String
+  fieldNameEn String
   fieldType  String // Generic type identifier for the field
   options    String[] // Array of options for checklist fields
   OrderField OrderField[]

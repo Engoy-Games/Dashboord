@@ -4,7 +4,10 @@ import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 
 // --- GET PRODUCT ---
-export async function GET(req: Request, { params }: { params: { productId: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { productId: string } }
+) {
   try {
     const { productId } = params;
 
@@ -23,7 +26,11 @@ export async function GET(req: Request, { params }: { params: { productId: strin
       where: { id: productId },
       include: {
         images: true,
-        category: true,
+        category: {
+          include: {
+            fields: true, // Fetch fields related to the category
+          },
+        },
       },
     });
 
@@ -31,14 +38,18 @@ export async function GET(req: Request, { params }: { params: { productId: strin
       return new NextResponse("Product not found", { status: 404 });
     }
 
-    // Include both nameEn and productDescriptionEn in the response
-    const productWithTranslations = {
+    // Include category fields in the response
+    const productWithFields = {
       ...product,
       nameEn: product.nameEn || null,
       productDescriptionEn: product.productDescriptionEn || null,
+      category: {
+        ...product.category,
+        fields: product.category?.fields || [], // Ensure fields are returned properly
+      },
     };
 
-    return new NextResponse(JSON.stringify(productWithTranslations), {
+    return new NextResponse(JSON.stringify(productWithFields), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -79,7 +90,8 @@ export async function PATCH(
       where: { id: storeId, userId },
     });
 
-    if (!storeByUserId) return new NextResponse("Unauthorized", { status: 401 });
+    if (!storeByUserId)
+      return new NextResponse("Unauthorized", { status: 401 });
 
     // Update product details
     await prismadb.product.update({
@@ -131,16 +143,20 @@ export async function DELETE(
       where: { id: storeId, userId },
     });
 
-    if (!storeByUserId) return new NextResponse("Unauthorized", { status: 401 });
+    if (!storeByUserId)
+      return new NextResponse("Unauthorized", { status: 401 });
 
     const relatedOrderItems = await prismadb.orderItem.findMany({
       where: { productId },
     });
 
     if (relatedOrderItems.length > 0) {
-      return new NextResponse("Cannot delete product with associated order items", {
-        status: 400,
-      });
+      return new NextResponse(
+        "Cannot delete product with associated order items",
+        {
+          status: 400,
+        }
+      );
     }
 
     const product = await prismadb.product.delete({

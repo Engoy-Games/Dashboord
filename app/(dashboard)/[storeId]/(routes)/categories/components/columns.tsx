@@ -4,7 +4,7 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { CellAction } from './cell-action';
 
-// Updated CategoryColumn type to include nameEn and categoryDescriptionEn
+// Updated CategoryColumn type to include fieldNameEn for fields
 export type CategoryColumn = {
   id: string;
   name: string;
@@ -14,7 +14,7 @@ export type CategoryColumn = {
   billboardLabel: string;
   createdAt: string;
   categoryType: string; // Include categoryType
-  fields: { fieldName: string; fieldType: string; options: string[] }[]; // Fields property
+  fields: { fieldName: string; fieldNameEn: string; fieldType: string; options: string[] }[]; // Fields property updated
 };
 
 export const columns: ColumnDef<CategoryColumn>[] = [
@@ -48,13 +48,26 @@ export const columns: ColumnDef<CategoryColumn>[] = [
     header: 'Category Type',
   },
   {
-    id: 'fields',
-    header: 'Fields',
+    id: 'fieldsArabic',
+    header: 'Fields (Arabic)',
     cell: ({ row }) => (
       <ul>
         {row.original.fields.map((field, index) => (
           <li key={index}>
             {field.fieldName}
+          </li>
+        ))}
+      </ul>
+    ),
+  },
+  {
+    id: 'fieldsEnglish',
+    header: 'Fields (English)',
+    cell: ({ row }) => (
+      <ul>
+        {row.original.fields.map((field, index) => (
+          <li key={index}>
+            <em style={{ color: 'gray', fontSize: '0.9em' }}>{field.fieldNameEn}</em> {/* English Field Name */}
           </li>
         ))}
       </ul>

@@ -55,6 +55,7 @@ type CategoryFormValues = z.infer<typeof formSchema>;
 
 interface CategoryField {
   fieldName: string;
+  fieldNameEn: string;
   fieldType: string;
   options: string[];
 }
@@ -147,7 +148,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   };
 
   const handleAddField = () => {
-    setFields([...fields, { fieldName: "", fieldType: "text", options: [] }]);
+    setFields([
+      ...fields,
+      { fieldName: "", fieldNameEn: "", fieldType: "text", options: [] },
+    ]);
   };
 
   const handleFieldChange = (index: number, field: Partial<CategoryField>) => {
@@ -409,6 +413,16 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                     }
                     placeholder="Field Name"
                     className="flex-grow min-w-0 "
+                  />
+                  <Input
+                    value={field.fieldNameEn}
+                    onChange={(e) =>
+                      handleFieldChange(fieldIndex, {
+                        fieldNameEn: e.target.value,
+                      })
+                    }
+                    placeholder="Field Name (EN)"
+                    className="flex-grow min-w-0"
                   />
                   <Select
                     value={field.fieldType}

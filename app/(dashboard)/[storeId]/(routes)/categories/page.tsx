@@ -32,6 +32,7 @@ const CategoriesPage = async ({ params }: { params: { storeId: string } }) => {
     categoryType: category.categoryType, // Include the categoryType
     fields: category.fields.map((field) => ({
       fieldName: field.fieldName,
+      fieldNameEn: field.fieldNameEn, // Corrected here to map field.fieldNameEn (if needed)
       fieldType: field.fieldType,
       options: field.options || [], // Ensure options are an array
     })),

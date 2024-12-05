@@ -100,16 +100,18 @@ export async function PATCH(
         fields: {
           upsert: fields
             .filter((field: { id: any }) => field.id)
-            .map((field: { id: any; fieldName: any; fieldType: any; options: any; OrderField: any }) => ({
+            .map((field: { id: any; fieldName: any; fieldNameEn: any; fieldType: any; options: any; OrderField: any }) => ({
               where: { id: field.id },
               update: {
                 fieldName: field.fieldName,
+                fieldNameEn: field.fieldNameEn,
                 fieldType: field.fieldType,
                 options: field.options,
                 OrderField: field.OrderField || undefined,
               },
               create: {
                 fieldName: field.fieldName,
+                fieldNameEn: field.fieldNameEn,
                 fieldType: field.fieldType,
                 options: field.options,
                 OrderField: field.OrderField || undefined,

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 import prismadb from '@/lib/prismadb'
 
+// POST function (your existing function)
 export async function POST(
   req: Request,
   { params }: { params: { storeId: string } },
@@ -12,21 +13,21 @@ export async function POST(
     const body = await req.json()
     const {
       name,
-      nameEn, // Added English name
+      nameEn,
       price,
       categoryId,
       images,
       isFeatured,
       isArchived,
-      productDescription, // Added productDescription
-      productDescriptionEn, // Added English product description
+      productDescription,
+      productDescriptionEn,
     } = body
 
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    if (!name || !nameEn) { // Check for both names
+    if (!name || !nameEn) {
       return new NextResponse('Missing name or nameEn', { status: 400 })
     }
 
@@ -60,14 +61,14 @@ export async function POST(
     const product = await prismadb.product.create({
       data: {
         name,
-        nameEn, // Store the English name
+        nameEn,
         price,
         categoryId,
         isFeatured,
         isArchived,
         storeId: params.storeId,
         productDescription,
-        productDescriptionEn, // Store the English description
+        productDescriptionEn,
         images: {
           createMany: {
             data: [...images.map((image: { url: string }) => image)],
@@ -84,11 +85,11 @@ export async function POST(
     })
   } catch (error) {
     console.log('[PRODUCTS_POST]', error)
-
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
 
+// GET function (without pagination)
 export async function GET(
   req: Request,
   { params }: { params: { storeId: string } },
@@ -122,7 +123,7 @@ export async function GET(
     const productsWithDescription = products.map(product => ({
       ...product,
       productDescription: product.productDescription || null,
-      productDescriptionEn: product.productDescriptionEn || null, // Ensure productDescriptionEn is included
+      productDescriptionEn: product.productDescriptionEn || null,
     }))
 
     return new NextResponse(JSON.stringify(productsWithDescription), {
@@ -133,7 +134,6 @@ export async function GET(
     })
   } catch (error) {
     console.log('[PRODUCTS_GET]', error)
-
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
