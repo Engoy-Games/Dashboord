@@ -18,13 +18,11 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!,
     )
   } catch (error: any) {
-    return new NextResponse(`Webook Error: ${error.message}`, { status: 400 })
+    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
   }
 
   const session = event.data.object as Stripe.Checkout.Session
-
   const address = session?.customer_details?.address
-
   const addressComponents = [
     address?.line1,
     address?.line2,
@@ -33,7 +31,6 @@ export async function POST(req: Request) {
     address?.postal_code,
     address?.country,
   ]
-
   const addressString = addressComponents.filter((c) => c !== null).join(', ')
 
   if (event.type === 'checkout.session.completed') {
@@ -51,16 +48,20 @@ export async function POST(req: Request) {
       },
     })
 
+    // Loop through the order items and process them
     const productIds = order.orderItems.map((orderItem) => orderItem.productId)
+    const quantities = order.orderItems.map((orderItem) => orderItem.quantity) // Capturing quantities
 
+    // Optional: Handle stock management (you could track stock elsewhere if needed)
+    // For now, we assume that the order goes through without stock checks
     await prismadb.product.updateMany({
       where: {
         id: {
-          in: [...productIds],
+          in: productIds,
         },
       },
       data: {
-        isArchived: true,
+        isArchived: true, // Mark products as archived after being ordered
       },
     })
   }

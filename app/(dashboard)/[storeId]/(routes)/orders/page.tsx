@@ -28,14 +28,25 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     id: order.id,
     phone: order.phone,
     address: order.address,
-    products: order.orderItems.map((item) => item.product.name).join(', '),
+    products: order.orderItems
+      .map((item) => `${item.product.name} (x${item.quantity})`)
+      .join(', '),
+    productDetails: order.orderItems.map((item) => ({
+      name: item.product.name,
+      quantity: item.quantity,
+    })),
     totalPrice: formatter.format(
-      order.orderItems.reduce((total, item) => total + Number(item.product.price), 0),
+      order.orderItems.reduce(
+        (total, item) => total + Number(item.product.price) * item.quantity,
+        0,
+      ),
     ),
     isPaid: order.isPaid,
-    status: order.status, // Use the correct field from the main order object
+    status: order.status,
     createdAt: format(order.createdAt, 'MMMM do, yyyy'),
   }));
+  
+  
 
   return (
     <div className="flex-col">

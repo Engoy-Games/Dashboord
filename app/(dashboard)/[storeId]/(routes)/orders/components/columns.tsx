@@ -11,13 +11,23 @@ export type OrderColumn = {
   address: string;
   isPaid: boolean;
   totalPrice: string;
-  products: string;
+  products: string; // Keep the formatted string version
+  productDetails: { name: string; quantity: number }[]; // Add the detailed array
   createdAt: string;
   status: string;
 };
 
 export const columns: ColumnDef<OrderColumn>[] = [
-  { accessorKey: 'products', header: 'Products' },
+  {
+    accessorKey: 'products',
+    header: 'Products',
+    cell: ({ row }) => {
+      const products = row.getValue('productDetails') as { name: string; quantity: number }[]; 
+      return products
+        .map(product => `${product.name} (x${product.quantity})`) // Format with quantity
+        .join(', '); // Join multiple products with a comma
+    },
+  },
   { accessorKey: 'phone', header: 'Phone' },
   { accessorKey: 'address', header: 'Address' },
   { accessorKey: 'totalPrice', header: 'Total Price' },

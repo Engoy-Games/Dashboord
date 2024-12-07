@@ -172,3 +172,47 @@ export async function DELETE(
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
+// --- CREATE ORDER ITEM ---
+// This is the new functionality for adding items to an order with quantity.
+export async function POST(
+  req: Request,
+  { params }: { params: { orderId: string } }
+) {
+  try {
+    const { userId } = auth();
+    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+
+    const { orderId } = params;
+    const body = await req.json();
+    const { productId, quantity } = body;
+
+    if (!productId || quantity <= 0) {
+      return new NextResponse("Missing or invalid quantity", { status: 400 });
+    }
+
+    const order = await prismadb.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return new NextResponse("Order not found", { status: 404 });
+    }
+
+    const orderItem = await prismadb.orderItem.create({
+      data: {
+        orderId,
+        productId,
+        quantity, // Handle quantity here
+      },
+    });
+
+    return new NextResponse(JSON.stringify(orderItem), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("[ORDER_ITEM_CREATE]", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}

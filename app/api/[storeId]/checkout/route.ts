@@ -24,16 +24,22 @@ export async function POST(
     };
   },
 ) {
-  const { productIds, orderFields } = await req.json(); // Expecting orderFields in the request body
+  const { productIds, orderFields, quantities } = await req.json(); // Expecting quantities as part of the request
 
-  if (!productIds) {
-    return new NextResponse("Missing 'productIds' in request body", {
+  if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+    return new NextResponse("Missing or invalid 'productIds' in request body", {
       status: 400,
     });
   }
 
   if (!orderFields || !Array.isArray(orderFields) || orderFields.length === 0) {
     return new NextResponse("Missing or invalid 'orderFields' in request body", {
+      status: 400,
+    });
+  }
+
+  if (!quantities || quantities.length !== productIds.length) {
+    return new NextResponse("Quantities array does not match the length of productIds", {
       status: 400,
     });
   }
@@ -48,31 +54,34 @@ export async function POST(
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-  products.forEach((product) => {
+  products.forEach((product, index) => {
+    const quantity = quantities[index];
+
     line_items.push({
-      quantity: 1,
+      quantity: quantity, // Use the quantity passed from the request
       price_data: {
         currency: 'USD',
         product_data: {
           name: product.name,
         },
-        unit_amount: product.price * 100,
+        unit_amount: product.price * 100, // Stripe expects amount in cents
       },
     });
   });
 
-  // Create the order with order fields
+  // Create the order with order fields and quantities
   const order = await prismadb.order.create({
     data: {
       storeId: params.storeId,
       isPaid: false,
       orderItems: {
-        create: productIds.map((productId: string) => ({
+        create: productIds.map((productId: string, index: number) => ({
           product: {
             connect: {
               id: productId,
             },
           },
+          quantity: quantities[index], // Set the quantity for this product
           // Create OrderFields for each productId based on the corresponding input
           OrderField: {
             create: orderFields.map((field) => ({
