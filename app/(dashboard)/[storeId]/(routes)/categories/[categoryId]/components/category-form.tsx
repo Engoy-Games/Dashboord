@@ -438,6 +438,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                       <SelectItem value="text">Text</SelectItem>
                       <SelectItem value="number">Number</SelectItem>
                       <SelectItem value="dropdown">Dropdown</SelectItem>
+                      <SelectItem value="image">Image</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button
