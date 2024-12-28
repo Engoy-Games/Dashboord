@@ -107,6 +107,7 @@ export async function GET(req: Request, { params }: { params: { storeId: string 
       },
       include: {
         fields: true, // Include the fields relation
+        billboard: true,
       },
     });
 
